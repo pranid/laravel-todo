@@ -60,7 +60,7 @@ class ProjectController extends Controller
 
 
         if($validator->passes()) {
-
+            $project = Project::create($request->all());
         }
 
         $validator->setAttributeNames($this->field_labels);

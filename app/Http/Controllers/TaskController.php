@@ -26,7 +26,11 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::where('user_id',Auth::id())->paginate(10);
+        $tasks = Task::leftjoin('users','users.id','=','tasks.user_id')
+                    ->select('users.name as username','tasks.*')
+                    ->where('tasks.user_id',Auth::id())
+                    ->paginate(10);
+
 
         return view('tasks', [
             'tasks' => $tasks
@@ -61,11 +65,9 @@ class TaskController extends Controller
                 ->withErrors($validator);
         }
 
-        $task = new Task;
-        $task->name = $request->name;
-        $task->user_id = Auth::id();
-        $task->save();
-
+        $data = $request->all();
+        $data['user_id'] = Auth::id();
+        $task = Task::create($data);
         return redirect($this->redirect_to);
     }
 
@@ -110,10 +112,17 @@ class TaskController extends Controller
                 ->withErrors($validator);
         }
 
-        $task = Task::find($request->id);
+        $data = $request->all();
+        $data['user_id'] = Auth::id();
+        /*unset($data['_method']);
+        unset($data['_token']);*/
+
+        $task = Task::updateorcreate($data);
+
+        /*$task = Task::find($request->id);
         $task->name = $request->name;
-        $task->user_id = Auth::id();
-        $task->save();
+        $task->user_id =
+        $task->save();*/
 
         return redirect($this->redirect_to);
     }
